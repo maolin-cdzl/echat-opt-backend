@@ -97,10 +97,10 @@ function readListLast(req,res,next,key) {
 			client.lrange(key,0,0,function(err,values) {
 				if( !err ) {
 					if( !values || values.length == 0 ) {
-						res.json(values[0]);
-					} else {
 						res.status(404);
 						res.end();
+					} else {
+						res.json(values[0]);
 					}
 				} else {
 					res.status(500);
