@@ -11,11 +11,6 @@ server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
 server.use(restify.bodyParser());
 
-server.get('/echo/:name', function (req, res, next) {
-  res.send(req.params);
-  return next();
-});
-
 
 server.get('/rt/user/:uid/state',user.state);
 server.get('/rt/user/:uid/entity',user.entity);
@@ -28,6 +23,18 @@ server.get('/rt/user/:uid/sessions',user.sessionHistory);
 server.get('/rt/user/:uid/entityset',user.entitySet);
 server.get('/rt/user/:uid/groupset',user.groupSet);
 server.get('/rt/user/:uid/deviceset',user.deviceSet);
+
+var SSE = require('./controllers/sse');
+var loadSse = SSE.create('load-pttsvc*','load-');
+
+
+server.get('/rt/entity/:entityid/load',loadSse.request);
+
+
+process.on('SIGINT',function(){
+    console.info('SIGINT');
+	process.exit(0);
+});
 
 server.listen(3000, function () {
   console.log('%s listening at %s', server.name, server.url);

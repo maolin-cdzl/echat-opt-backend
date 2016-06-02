@@ -1,7 +1,7 @@
 var reader = require('../models/redisreader');
 var JsonResponser = require('./json-responser');
 
-var getuser = {
+var userProvider = {
 	state : function(req,res,next) {
 		var key = 'user:' + req.params.uid + ':state';
         console.info('get state : %s', key);
@@ -49,4 +49,4 @@ var getuser = {
 	}
 };
 
-module.exports = getuser;
+module.exports = userProvider;
