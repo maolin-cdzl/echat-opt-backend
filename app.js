@@ -6,6 +6,7 @@ var server = restify.createServer({
 });
 
 var user = require('./controllers/user');
+var dev = require('./controllers/dev');
 
 server.use(restify.acceptParser(server.acceptable));
 server.use(restify.queryParser());
@@ -23,6 +24,7 @@ server.get('/rt/user/:uid/sessions',user.sessionHistory);
 server.get('/rt/user/:uid/entityset',user.entitySet);
 server.get('/rt/user/:uid/groupset',user.groupSet);
 server.get('/rt/user/:uid/deviceset',user.deviceSet);
+server.get('/rt/dev/info',dev.devSet);
 
 var SSE = require('./controllers/sse');
 var loadSse = SSE.create('load-pttsvc*','load-');
