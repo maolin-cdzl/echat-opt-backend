@@ -5,7 +5,7 @@ var devProvider = {
 	devSet: function(req,res,next) {
 		reader.readSetSetCount('dev-set','dev:',':user',function(err,devs){
 			if( !err && devs && devs.length > 0 ) {
-				res.json(JSON.stringify(devs));
+				res.json(devs);
 			} else {
 				res.status(404);
 				res.end();
