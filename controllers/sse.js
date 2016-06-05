@@ -2,10 +2,10 @@ var RedisSub = require('../models/redissub');
 
 function requestProc(req,res,next) {
 	var channel;
-	if( req.params.entityid == undefined ) {
+	if( req.params.channel == undefined ) {
 		channel = '*';
 	} else {
-		channel = this.prefix + req.params.entityid;
+		channel = req.params.channel;
 	}
 	this.register(channel,req,res);
 
@@ -13,15 +13,29 @@ function requestProc(req,res,next) {
 	res.writeHead(200, {
     	'Content-Type': 'text/event-stream',  // <- Important headers
     	'Cache-Control': 'no-cache',
-    	'Connection': 'keep-alive'
+    	'Connection': 'keep-alive',
+		'Access-Control-Allow-Origin': '*',
+		'Transfer-Encoding' : ''
     });
-    res.write('\n');
+	res.write('\n');
 }
 
 function onMessage(pattern,channel,message) {
 	console.info('PMESSAGE %s %s %s',pattern,channel,message);
 
-	var chunk = message + '\n\n';
+	var lines = message.split('\n');
+	if( lines.length == 0 ) {
+		return;
+	}
+	var chunk = 'event: ' + channel + '\n';
+	for(var i = 0; i < lines.length; i++) {
+		var line = lines[i].trim();
+		if( line.length == 0 ) {
+			continue;
+		}
+		chunk = chunk.concat('data: ' + line + '\n');
+	}
+	chunk = chunk.concat('\n');
 
 	var l = this.clients.length;
 	for(var i =0; i < l; i++) {
@@ -68,9 +82,8 @@ function closeSse() {
 
 
 var SSE = {
-	create : function(pattern,prefix) {
+	create : function(pattern) {
 		var sse = {};
-		sse.prefix = prefix;
 		sse.clients = [];
 
 		sse.sub = RedisSub.createPSub(pattern,onMessage.bind(sse));

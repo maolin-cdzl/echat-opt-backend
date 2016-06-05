@@ -2,6 +2,10 @@ var reader = require('../models/redisreader');
 var JsonResponser = require('./json-responser');
 
 var userProvider = {
+	count: function(req,res,next) {
+		var key = 'user:set';
+		reader.readSetSize(key,JsonResponser.create(req,res,next).integerResponser);
+	},
 	state : function(req,res,next) {
 		var key = 'user:' + req.params.uid + ':state';
         console.info('get state : %s', key);

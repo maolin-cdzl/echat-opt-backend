@@ -20,6 +20,10 @@ var redisReader = {
 	readSet: pool.pooled( function(client,key,callback) {
 		client.smembers(key,callback);
 	}),
+
+	readSetSize: pool.pooled( function(client,key,callback) {
+		client.scard(key,callback);
+	}),
 	
 	// first read names from set,and read item count of sets with name 'prefix' + name + 'suffix'.
 	// return arrays with item { name: 'aaa', count: x }

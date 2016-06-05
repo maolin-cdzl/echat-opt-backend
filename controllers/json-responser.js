@@ -5,6 +5,21 @@ var JsonResponser = {
 		responser.req = req;
 		responser.res = res;
 		responser.next = next;
+		responser.integerResponser = function(err,value) {
+			if( !err ) {
+				if( !value ) {
+					res.status(404);
+					res.end();
+				} else {
+					console.info('get value %d',value);
+					res.json(JSON.stringify(value));
+				}
+			} else {
+				res.status(500);
+				res.end(err.message);
+			}
+			next();
+		};
 		responser.stringResponser = function(err,value) {
 			if( !err ) {
 				if( !value ) {

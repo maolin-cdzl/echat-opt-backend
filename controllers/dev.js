@@ -3,7 +3,7 @@ var JsonResponser = require('./json-responser');
 
 var devProvider = {
 	devSet: function(req,res,next) {
-		reader.readSetSetCount('dev-set','dev:',':user',function(err,devs){
+		reader.readSetSetCount('dev:set','dev:',':user',function(err,devs){
 			if( !err && devs && devs.length > 0 ) {
 				res.json(devs);
 			} else {
