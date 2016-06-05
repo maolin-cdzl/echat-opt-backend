@@ -27,7 +27,7 @@ function onMessage(pattern,channel,message) {
 	if( lines.length == 0 ) {
 		return;
 	}
-	var chunk = 'event: ' + channel + '\n';
+	var chunk = 'event: ' + this.eventname + '\n';
 	for(var i = 0; i < lines.length; i++) {
 		var line = lines[i].trim();
 		if( line.length == 0 ) {
@@ -40,9 +40,7 @@ function onMessage(pattern,channel,message) {
 	var l = this.clients.length;
 	for(var i =0; i < l; i++) {
 		var client = this.clients[i];
-		console.info('check client with %s',client.channel);
 		if( client.channel == '*' || client.channel == channel ) {
-			console.info('send message');
 			client.res.write(chunk);
 		}
 	}
@@ -82,8 +80,9 @@ function closeSse() {
 
 
 var SSE = {
-	create : function(pattern) {
+	create : function(pattern,eventname) {
 		var sse = {};
+		sse.eventname = eventname;
 		sse.clients = [];
 
 		sse.sub = RedisSub.createPSub(pattern,onMessage.bind(sse));

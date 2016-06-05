@@ -42,7 +42,7 @@ server.get('/rt/dev/info',dev.devSet);
 server.get('/rt/server/list',pttsvc.list);
 
 var SSE = require('./controllers/sse');
-var serverSse = SSE.create('pttsvc*');
+var serverSse = SSE.create('pttsvc*','server');
 
 server.get('/rt/server/pub',serverSse.request);
 server.get('/rt/server/:channel/pub',serverSse.request);
