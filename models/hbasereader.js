@@ -1,5 +1,5 @@
 var hbase = require('hbase')
-var redisReader = request('./redisreader')
+var redisReader = require('./redisreader')
 
 var client = hbase({ protocol: 'http', host: 'localhost', port: 8080});
 var tableUserAction = client.table('user_action');
@@ -17,7 +17,6 @@ var tableCompanySpeakLoad = client.table('company_speak_load');
 
 function stringHashCode(str) {
 	var hash = 5381;
-	final int strlen = str.length();
 	for(var i=0; i < str.length; i++) {
 		hash = hash * 33 + str[i];
 	}
@@ -58,7 +57,7 @@ var reader = {
 				console.info(rows);
 			}
 			this.callback(err,rows);
-		};
+		}.bind(ctx);
 		ctx._scan = function(err,company) {
 			if( err || company == null ) {
 				this.callback('company not found',null);
@@ -71,7 +70,7 @@ var reader = {
 				scanOpt.endRow = userActionKey(company,this.options.uid,this.options.end,null);
 			}
 			var scaner = tableUserAction.scan(scanOpt,this._onRows);
-		};
+		}.bind(ctx);
 
 		redisReader.readKeyValue('db:user:' + options.uid + ':company',ctx._scan);
 	},

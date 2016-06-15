@@ -1,8 +1,8 @@
 
 var redisConf = {
 	port: 6379,
-	//host: "192.168.1.181",
-	host: "127.0.0.1",
+	host: "192.168.1.181",
+	//host: "127.0.0.1",
 	retry_strategy: function (options) {
 		if (options.error.code === 'ECONNREFUSED') {
 			console.error('The server refused the connection');  

@@ -1,5 +1,5 @@
 var redis = require('../models/redisreader');
-var hbase = require('../modules/hbasereader');
+var hbase = require('../models/hbasereader');
 var JsonResponser = require('./json-responser');
 
 var userProvider = {
@@ -50,6 +50,7 @@ var userProvider = {
 		if( query.end ) {
 			opt.end = query.end;
 		}
+		console.info('actions: uid=%d start=%s',opt.uid,opt.start)
 		hbase.userAction(opt,JsonResponser.create(req,res,next).arrayResponser);
 	},
 	brokens: function(req,res,next) { 
