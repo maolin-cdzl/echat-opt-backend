@@ -1,56 +1,65 @@
-var reader = require('../models/redisreader');
+var redis = require('../models/redisreader');
+var hbase = require('../modules/hbasereader');
 var JsonResponser = require('./json-responser');
 
 var userProvider = {
 	count: function(req,res,next) {
 		var key = 'user:set';
-		reader.readSetSize(key,JsonResponser.create(req,res,next).integerResponser);
+		redis.readSetSize(key,JsonResponser.create(req,res,next).integerResponser);
+	},
+	company: function(req,res,next) {
+		var key = 'db:user:' + req.params.uid + ':company';
+        console.info('get company: %s', key);
+		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
 	},
 	state : function(req,res,next) {
 		var key = 'user:' + req.params.uid + ':state';
         console.info('get state : %s', key);
-		reader.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
+		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
 	},
-	entity: function(req,res,next) { 
-		var key = 'user:' + req.params.uid + ':entity';
-		reader.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
+	server: function(req,res,next) { 
+		var key = 'user:' + req.params.uid + ':server';
+		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
 	},
 	group: function(req,res,next) { 
 		var key = 'user:' + req.params.uid + ':group';
-		reader.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
-	},
-	listenGroup: function(req,res,next) {
-		var key = 'user:' + req.params.uid + ':listen-groups';
-		reader.readSet(key,JsonResponser.create(req,res,next).arrayResponser);
+		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
 	},
 	lastLogin: function(req,res,next) { 
 		var key = 'user:' + req.params.uid + ':last-login';
-		reader.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
+		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
 	},
 	lastLogout: function(req,res,next) { 
 		var key = 'user:' + req.params.uid + ':last-logout';
-		reader.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
+		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
 	},
-	brokenHistory: function(req,res,next) { 
-		var key = 'user:' + req.params.uid + ':brokens';
-		reader.readList(key,JsonResponser.create(req,res,next).arrayResponser);
-	},
-	sessionHistory: function(req,res,next) { 
-		var key = 'user:' + req.params.uid + ':sessions';
-		reader.readList(key,JsonResponser.create(req,res,next).arrayResponser);
-	},
-	entitySet: function(req,res,next) { 
-		var key = 'user:' + req.params.uid + ':entity-set';
-		reader.readSet(key,JsonResponser.create(req,res,next).arrayResponser);
-	},
-	deviceSet: function(req,res,next) { 
+	device: function(req,res,next) { 
 		var key = 'user:' + req.params.uid + ':dev-set';
-		reader.readSet(key,JsonResponser.create(req,res,next).arrayResponser);
+		redis.readSKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
 	},
-	groupSet: function(req,res,next) { 
-		var key = 'user:' + req.params.uid + ':group-set';
-		reader.readSet(key,JsonResponser.create(req,res,next).arrayResponser);
-	}
+	actions: function(req,res,next) {
+		var query = require('url').parse(req.url,true).query;
+
+		if( ! query.start ) {
+			console.info('required start');
+			res.status(400);
+			res.end();
+			return;
+		}
+		var opt = { uid: req.params.uid, start: query.start };
+		if( query.end ) {
+			opt.end = query.end;
+		}
+		hbase.userAction(opt,JsonResponser.create(req,res,next).arrayResponser);
+	},
+	brokens: function(req,res,next) { 
+		var key = 'user:' + req.params.uid + ':brokens';
+		redis.readList(key,JsonResponser.create(req,res,next).arrayResponser);
+	},
+	sessions: function(req,res,next) { 
+		var key = 'user:' + req.params.uid + ':sessions';
+		redis.readList(key,JsonResponser.create(req,res,next).arrayResponser);
+	},
 };
 
 module.exports = userProvider;

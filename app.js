@@ -26,16 +26,15 @@ server.use(restify.bodyParser());
 
 server.get('/rt/user/count',user.count);
 server.get('/rt/user/:uid/state',user.state);
-server.get('/rt/user/:uid/entity',user.entity);
+server.get('/rt/user/:uid/server',user.server);
 server.get('/rt/user/:uid/group',user.group);
-server.get('/rt/user/:uid/listengroup',user.listenGroup);
+server.get('/rt/user/:uid/device',user.device);
 server.get('/rt/user/:uid/lastlogin',user.lastLogin);
 server.get('/rt/user/:uid/lastlogout',user.lastLogout);
-server.get('/rt/user/:uid/brokens',user.brokenHistory);
-server.get('/rt/user/:uid/sessions',user.sessionHistory);
-server.get('/rt/user/:uid/entityset',user.entitySet);
-server.get('/rt/user/:uid/groupset',user.groupSet);
-server.get('/rt/user/:uid/deviceset',user.deviceSet);
+
+server.get('/rt/user/:uid/actions',user.actions);
+server.get('/rt/user/:uid/sessions',user.sessions);
+server.get('/rt/user/:uid/brokens',user.brokens);
 
 server.get('/rt/dev/info',dev.devSet);
 
