@@ -23,6 +23,14 @@ function stringHashCode(str) {
 	return hash;
 }
 
+function int64hi(num) {
+	return (num >> 32);
+}
+
+function int64lo(num) {
+	return (num & 0xFFFFFFFF);
+}
+
 function userActionKey(company,uid,datetime,ev) {
 	var keybuf = new ArrayBuffer(20);
 	var keyview = new DataView(keybuf);
@@ -33,7 +41,8 @@ function userActionKey(company,uid,datetime,ev) {
 		if( ts == null ) {
 			return null;
 		}
-		keyview.setInt64(8,ts);
+		keyview.setInt32(8,int64hi(ts));
+		keyview.setInt32(12,int64lo(ts));
 	}
 	if( ev ) {
 		keyview.setInt32(16,stringHashCode(ev));
