@@ -27,8 +27,11 @@ function stringHashCode(str){
 }
 
 
-function int64hi(num) {
-	return (num >> 32);
+function int64hi(hi) {
+	hi = Math.abs(hi);
+	hi = hi / 0x100000000;
+	hi = hi | 0;
+	return hi;
 }
 
 function int64lo(num) {
@@ -109,7 +112,7 @@ var reader = {
 			if( this.options.end ) {
 				scanOpt.endRow = userActionKey(company,this.options.uid,this.options.end);
 			} else {
-				scanOpt.endRow = userActionKey(company,this.options.uid);
+				scanOpt.endRow = userActionKey(company,this.options.uid,'2020-01-01');
 			}
 			console.info('startRow: %s', ua2hex(scanOpt.startRow));
 			console.info('endRow: %s', ua2hex(scanOpt.endRow));
