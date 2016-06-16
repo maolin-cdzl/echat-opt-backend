@@ -1,13 +1,14 @@
 {
-	"name": "rest-backend",
-	"version": "0.0.0",
-	"private": true,
-	"scripts": {
-		"start": "node app.js"
-	},
-	"dependencies": {
-		"restify" : "~4.1.0",
-		"redis": "~2.6.0",
-		"generic-pool" : "~2.1.1"
-	}
+  "name": "rest-backend",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "generic-pool": "~2.1.1",
+    "hbase-rpc-client": "^0.1.10",
+    "redis": "~2.6.0",
+    "restify": "~4.1.0"
+  }
 }

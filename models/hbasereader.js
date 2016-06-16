@@ -1,20 +1,37 @@
-var hbase = require('hbase')
+var hbase = require('hbase-rpc-client')
 var redisReader = require('./redisreader')
 var HRowDecoder = require('./hbaseutil').HRowDecoder;
 var HKeyGenerator = require('./hbaseutil').HKeyGenerator;
 
-var client = hbase({ protocol: 'http', host: 'localhost', port: 8081 });
-var tableUserAction = client.table('user_action');
-var tableUserSession = client.table('user_session');
-var tableBrokenHistory = client.table('broken_history');
-var tableGroupEvent = client.table('group_event');
-var tableTempGroupEvent = client.table('temp_group_event');
-var tableGroupSpeaking = client.table('group_speaking');
-var tableTempGroupSpeaking = client.table('temp_group_speaking');
-var tableServerUserLoad = client.table('server_user_load');
-var tableServerSpeakLoad = client.table('server_speak_load');
-var tableCompanyUserLoad = client.table('company_user_load');
-var tableCompanySpeakLoad = client.table('company_speak_load');
+var hclient = hbase({ 
+	zookeeperHosts: ["base001.hdp.echat.com","base003.hdp.echat.com","base002.hdp.echat.com"],
+    zookeeperRoot: "/hbase-unsecure",
+    zookeeperReconnectTimeout: 20000,
+    rootRegionZKPath: "/meta-region-server",
+    rpcTimeout: 30000,
+    callTimeout: 5000,
+    tcpNoDelay: false,
+    tcpKeepAlive: true
+});
+
+hclient.on('error',function(err){
+	console.log('hbase client error:',err);
+});
+
+
+/*
+var tableUserAction = hclient.table('user_action');
+var tableUserSession = hclient.table('user_session');
+var tableBrokenHistory = hclient.table('broken_history');
+var tableGroupEvent = hclient.table('group_event');
+var tableTempGroupEvent = hclient.table('temp_group_event');
+var tableGroupSpeaking = hclient.table('group_speaking');
+var tableTempGroupSpeaking = hclient.table('temp_group_speaking');
+var tableServerUserLoad = hclient.table('server_user_load');
+var tableServerSpeakLoad = hclient.table('server_speak_load');
+var tableCompanyUserLoad = hclient.table('company_user_load');
+var tableCompanySpeakLoad = hclient.table('company_speak_load');
+*/
 
 var kgUserAction = HKeyGenerator.create([
 		HKeyGenerator.FieldEnum.STRING_HASH,						// company
@@ -114,7 +131,15 @@ var reader = {
 			scanOpt.maxVersion = 1;
 			scanOpt.startRow = kgUserAction.generate(company,this.options.uid,this.options.start);
 			scanOpt.endRow = kgUserAction.generate(company,this.options.uid,this.options.end | HKeyGenerator.ValueEnum.MAX);
-			this.scaner = tableUserAction.scan(scanOpt,onCells.bind(this));
+			var scanner = hclient.getScanner('user_action',scanOpt.startRow,scanOpt.endRow);
+			scanner.each(function(err,row){
+				if( row ) {
+					console.log(row);
+				} else if( err ) {
+					console.error('scanner error: ',err);
+				}
+			});
+
 		}.bind(ctx);
 
 		redisReader.readKeyValue('db:user:' + options.uid + ':company',ctx._scan);
