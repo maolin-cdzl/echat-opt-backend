@@ -127,17 +127,19 @@ var reader = {
 			}
 			console.info('scan: company=%s uid=%s start=%s',company,this.options.uid,this.options.start);
 
-			var scanOpt = {};
-			scanOpt.maxVersion = 1;
-			scanOpt.startRow = kgUserAction.generate(company,this.options.uid,this.options.start);
-			scanOpt.endRow = kgUserAction.generate(company,this.options.uid,this.options.end | HKeyGenerator.ValueEnum.MAX);
-			var scanner = hclient.getScanner('user_action',scanOpt.startRow,scanOpt.endRow);
+			var startRow = kgUserAction.generate(company,this.options.uid,this.options.start);
+			var endRow = kgUserAction.generate(company,this.options.uid,this.options.end | HKeyGenerator.ValueEnum.MAX);
+			var decoder = HRowDecoder.create();
+			var scanner = hclient.getScanner('user_action',startRow,endRow);
 			scanner.each(function(err,row){
 				if( row ) {
-					console.log(row);
+					decoder.merge(row);
 				} else if( err ) {
 					console.error('scanner error: ',err);
+					callback(err);
 				}
+			},function(){
+				callback(null,decoder.getRows());
 			});
 
 		}.bind(ctx);
