@@ -16,14 +16,16 @@ var tableCompanyUserLoad = client.table('company_user_load');
 var tableCompanySpeakLoad = client.table('company_speak_load');
 
 
-function stringHashCode(str) {
-	var hash = 5381;
-	for(var i=0; i < str.length; i++) {
-		hash = hash * 33 + str[i];
-		hash = hash & 0xFFFFFFFF;
-	}
-	return hash;
+function stringHashCode(str){
+    var hash = 5381;
+    for (i = 0; i < str.length; i++) {
+        char = str.charCodeAt(i);
+        hash = ((hash << 5) + hash) + char; /* hash * 33 + c */
+		hash = hash & hash; // limit to 32bit
+    }
+    return hash;
 }
+
 
 function int64hi(num) {
 	return (num >> 32);
