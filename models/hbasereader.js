@@ -1,6 +1,6 @@
 var hbase = require('hbase')
 var redisReader = require('./redisreader')
-var UserActionCell = require('./hbaseparser').UserActionCell;
+var UserActionTable = require('./hbaseparser').UserAction;
 
 var client = hbase({ protocol: 'http', host: 'localhost', port: 8081 });
 var tableUserAction = client.table('user_action');
@@ -67,7 +67,7 @@ var reader = {
 
 				var uacells = [];
 				for(var i=0; i < cells.length; i++) {
-					var uacell = UserActionCell.create(cells[i]);
+					var uacell = UserActionTable.createFromCell(cells[i]);
 					console.log(uacell);
 					uacells.append(uacell);
 				}

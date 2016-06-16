@@ -1,6 +1,6 @@
 
-var UserActionCell = {
-	create: function(cell) {
+var UserActionTable = {
+	createFromCell: function(cell) {
 		var fc = cell.column.toString().split(':');
 		if( fc.length != 2 ) {
 			console.log('bad column: %s',cell.column.toString());
@@ -18,5 +18,5 @@ var UserActionCell = {
 }
 
 
-module.exports = [ UserActionCell ];
+module.exports = { UserAction: UserActionTable };
 
