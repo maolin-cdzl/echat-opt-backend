@@ -1,7 +1,7 @@
 var hbase = require('hbase')
 var redisReader = require('./redisreader')
 
-var client = hbase({ protocol: 'http', host: 'localhost', port: 8080});
+var client = hbase({ protocol: 'http', host: 'localhost', port: 8081 });
 var tableUserAction = client.table('user_action');
 var tableUserSession = client.table('user_session');
 var tableBrokenHistory = client.table('broken_history');
@@ -60,12 +60,31 @@ var reader = {
 		var ctx = {}
 		ctx.options = options;
 		ctx.callback = callback;
-		ctx._onRows = function(err,rows) {
-			if( rows ) {
-				console.info('getRows: %d',rows.length);
-				console.info(rows);
+		ctx._onCells = function(err,cells) {
+			if( cells ) {
+				console.info('getRows: %d',cells.length);
+
+				var rowsMap = {};
+				for(var i=0; i < cells.length; i++) {
+					var cell = cells[i];
+					console.info('column: %s, value: %s',cell.column,cell.$);
+					if( ! (cell.key in rowsMap) ) {
+						rowsMap[key] = { key: cell.key};
+					}
+					var row = rowsMap[cell.key];
+					row[cell.column] = cell.$;
+				}
+
+				var rows = []
+				for(var key in rowsMap) {
+					rows.append(rowsMap[key]);
+				}
+				this.callback(err,rows);
+			} else if( err ) {
+				console.error(err);
+				console.error(err.stack);
+				this.callback(err);
 			}
-			this.callback(err,rows);
 		}.bind(ctx);
 		ctx._scan = function(err,company) {
 			if( err || company == null ) {
@@ -74,11 +93,14 @@ var reader = {
 			console.info('company: %s',company);
 
 			var scanOpt = {};
+			scanOpt.maxVersion = 1;
 			scanOpt.startRow = userActionKey(company,this.options.uid,this.options.start,null);
 			if( this.options.end ) {
 				scanOpt.endRow = userActionKey(company,this.options.uid,this.options.end,null);
 			}
-			var scaner = tableUserAction.scan(scanOpt,this._onRows);
+			console.info('scanOpt:');
+			console.info(scanOpt);
+			this.scaner = tableUserAction.scan(scanOpt,this._onCells);
 		}.bind(ctx);
 
 		redisReader.readKeyValue('db:user:' + options.uid + ':company',ctx._scan);
