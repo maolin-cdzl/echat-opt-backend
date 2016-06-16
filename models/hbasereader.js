@@ -36,8 +36,16 @@ function int64lo(num) {
 }
 
 function userActionKey(company,uid,datetime,ev) {
-	console.log('%s %s %s',company,uid,datetime);
-	var keybuf = new ArrayBuffer(20);
+	console.log('%s %s %s %s',company,uid,datetime,ev);
+	var keybuf = undefined;
+	if( datetime && ev ) {
+		keybuf = new ArrayBuffer(20);
+	} else if( datetime ) {
+		keybuf = new ArrayBuffer(16);
+	} else {
+		keybuf = new ArrayBuffer(8);
+	}
+
 	var keyview = new DataView(keybuf);
 
 	keyview.setInt32(0,stringHashCode(company));
@@ -49,14 +57,9 @@ function userActionKey(company,uid,datetime,ev) {
 		}
 		keyview.setInt32(8,int64hi(ts));
 		keyview.setInt32(12,int64lo(ts));
-	} else {
-		keyview.setInt32(8,0xFFFFFFFF);
-		keyview.setInt32(12,0xFFFFFFFF);
-	}
-	if( ev ) {
-		keyview.setInt32(16,stringHashCode(ev));
-	} else {
-		keyview.setInt32(16,0xFFFFFFFF);
+		if( ev ) {
+			keyview.setInt32(16,stringHashCode(ev));
+		}
 	}
 	return new Uint8Array(keybuf);
 }
@@ -102,9 +105,9 @@ var reader = {
 
 			var scanOpt = {};
 			scanOpt.maxVersion = 1;
-			scanOpt.startRow = userActionKey(company,this.options.uid,this.options.start,null);
+			scanOpt.startRow = userActionKey(company,this.options.uid,this.options.start);
 			if( this.options.end ) {
-				scanOpt.endRow = userActionKey(company,this.options.uid,this.options.end,null);
+				scanOpt.endRow = userActionKey(company,this.options.uid,this.options.end);
 			} else {
 				scanOpt.endRow = userActionKey(company,this.options.uid);
 			}
