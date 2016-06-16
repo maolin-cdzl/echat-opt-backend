@@ -1,6 +1,7 @@
 var hbase = require('hbase')
 var redisReader = require('./redisreader')
-var HTableParser = require('./hbaseparser');
+var HRowDecoder = require('./hbaseutil').HRowDecoder;
+var HKeyGenerator = require('./hbaseutil').HKeyGenerator;
 
 var client = hbase({ protocol: 'http', host: 'localhost', port: 8081 });
 var tableUserAction = client.table('user_action');
@@ -15,64 +16,82 @@ var tableServerSpeakLoad = client.table('server_speak_load');
 var tableCompanyUserLoad = client.table('company_user_load');
 var tableCompanySpeakLoad = client.table('company_speak_load');
 
+var kgUserAction = HKeyGenerator.create([
+		HKeyGenerator.FieldEnum.STRING_HASH,						// company
+		HKeyGenerator.FieldEnum.STRING_HASH,						// uid
+		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// ts
+		HKeyGenerator.FieldEnum.STRING_HASH						// event
+]);
+var kgUserSession = HKeyGenerator.create([
+		HKeyGenerator.FieldEnum.STRING_HASH,						// company
+		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// login
+		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// logout
+		HKeyGenerator.FieldEnum.STRING_HASH						// uid
+]);
 
-function stringHashCode(str){
-    var hash = 5381;
-    for (i = 0; i < str.length; i++) {
-        char = str.charCodeAt(i);
-        hash = ((hash << 5) + hash) + char; /* hash * 33 + c */
-		hash = hash & hash; // limit to 32bit
-    }
-    return hash;
-}
+// broken list has not implements in storm yet. 
+//var kgBrokenHistory = HKeyGenerator.create([
+//]);
+
+var kgGroupEvent = HKeyGenerator.create([
+		HKeyGenerator.FieldEnum.STRING_HASH,						// company
+		HKeyGenerator.FieldEnum.STRING_HASH,						// gid
+		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// ts
+		HKeyGenerator.FieldEnum.STRING_HASH						// event
+]);
+var kgTempGroupEvent = HKeyGenerator.create([
+		HKeyGenerator.FieldEnum.STRING_HASH,						// company
+		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// ts
+		HKeyGenerator.FieldEnum.STRING_HASH,						// server
+		HKeyGenerator.FieldEnum.STRING_HASH,						// gid
+		HKeyGenerator.FieldEnum.STRING_HASH						// event
+]);
+var kgGroupSpeaking = HKeyGenerator.create([
+		HKeyGenerator.FieldEnum.STRING_HASH,						// company
+		HKeyGenerator.FieldEnum.STRING_HASH,						// gid
+		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// start
+		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// end
+		HKeyGenerator.FieldEnum.STRING_HASH						// uid
+]);
+var kgTempGroupSpeaking = HKeyGenerator.create([
+		HKeyGenerator.FieldEnum.STRING_HASH,						// company
+		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// start
+		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// end
+		HKeyGenerator.FieldEnum.STRING_HASH,						// uid
+		HKeyGenerator.FieldEnum.STRING_HASH						// gid
+]);
+var kgServerUserLoad = HKeyGenerator.create([
+		HKeyGenerator.FieldEnum.STRING_HASH,						// server
+		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// ts
+]);
+var kgServerSpeakLoad = HKeyGenerator.create([
+		HKeyGenerator.FieldEnum.STRING_HASH,						// server
+		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// ts
+]);
+var kgCompanyUserLoad = HKeyGenerator.create([
+		HKeyGenerator.FieldEnum.STRING_HASH,						// company
+		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// ts
+]);
+var kgCompanySpeakLoad = HKeyGenerator.create([
+		HKeyGenerator.FieldEnum.STRING_HASH,						// company
+		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// ts
+]);
 
 
-function int64hi(hi) {
-	hi = Math.abs(hi);
-	hi = hi / 0x100000000;
-	hi = hi | 0;
-	return hi;
-}
-
-function int64lo(num) {
-	return (num & 0xFFFFFFFF);
-}
-
-function userActionKey(company,uid,datetime,ev) {
-	console.log('%s %s %s %s',company,uid,datetime,ev);
-	var keybuf = undefined;
-	if( datetime && ev ) {
-		keybuf = new ArrayBuffer(20);
-	} else if( datetime ) {
-		keybuf = new ArrayBuffer(16);
-	} else {
-		keybuf = new ArrayBuffer(8);
-	}
-
-	var keyview = new DataView(keybuf);
-
-	keyview.setInt32(0,stringHashCode(company));
-	keyview.setInt32(4,stringHashCode(uid));
-	if( datetime ) {
-		var ts = Date.parse(datetime);
-		if( ts == null ) {
-			return null;
+function onCells(err,cells) {
+	if( cells ) {
+		var decoder = HRowDecoder.create();
+		for(var i=0; i < cells.length; i++) {
+			decoder.merge(cells[i]);
 		}
-		keyview.setInt32(8,int64hi(ts));
-		keyview.setInt32(12,int64lo(ts));
-		if( ev ) {
-			keyview.setInt32(16,stringHashCode(ev));
-		}
+		var rows = decoder.getRows();
+		console.info('getRows: %d',rows.length);
+		this.callback(err,rows);
+	} else if( err ) {
+		console.error(err);
+		console.error(err.stack);
+		this.callback(err);
 	}
-	return new Uint8Array(keybuf);
-}
-
-function ua2hex(ua) {
-	var hex ='';
-	for(var i=0; i < ua.length; i++) {
-		hex += ua[i].toString(16) + ' ';
-	}
-	return hex;
 }
 
 var reader = {
@@ -85,21 +104,6 @@ var reader = {
 		var ctx = {}
 		ctx.options = options;
 		ctx.callback = callback;
-		ctx._onCells = function(err,cells) {
-			if( cells ) {
-				var parser = HTableParser.create();
-				for(var i=0; i < cells.length; i++) {
-					parser.merge(cells[i]);
-				}
-				var rows = parser.getRows();
-				console.info('getRows: %d',rows.length);
-				this.callback(err,rows);
-			} else if( err ) {
-				console.error(err);
-				console.error(err.stack);
-				this.callback(err);
-			}
-		}.bind(ctx);
 		ctx._scan = function(err,company) {
 			if( err || company == null ) {
 				this.callback('company not found',null);
@@ -108,15 +112,9 @@ var reader = {
 
 			var scanOpt = {};
 			scanOpt.maxVersion = 1;
-			scanOpt.startRow = userActionKey(company,this.options.uid,this.options.start);
-			if( this.options.end ) {
-				scanOpt.endRow = userActionKey(company,this.options.uid,this.options.end);
-			} else {
-				scanOpt.endRow = userActionKey(company,this.options.uid,'2020-01-01');
-			}
-			console.info('startRow: %s', ua2hex(scanOpt.startRow));
-			console.info('endRow: %s', ua2hex(scanOpt.endRow));
-			this.scaner = tableUserAction.scan(scanOpt,this._onCells);
+			scanOpt.startRow = kgUserAction.generate(company,this.options.uid,this.options.start);
+			scanOpt.endRow = kgUserAction.generate(company,this.options.uid,this.options.end | HKeyGenerator.ValueEnum.MAX);
+			this.scaner = tableUserAction.scan(scanOpt,onCells.bind(this));
 		}.bind(ctx);
 
 		redisReader.readKeyValue('db:user:' + options.uid + ':company',ctx._scan);
