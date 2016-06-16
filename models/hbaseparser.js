@@ -40,7 +40,7 @@ var HTableParser = {
 		var parser = {};
 		parser._rowMap = {};
 
-		parser.merge = function(date) {
+		parser.merge = function(data) {
 			var cell = dataToCell(data);
 			if( cell == null )
 				return;
