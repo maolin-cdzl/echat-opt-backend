@@ -1,5 +1,6 @@
 var hbase = require('hbase')
 var redisReader = require('./redisreader')
+var UserActionCell = require('./hbaseparser').UserActionCell;
 
 var client = hbase({ protocol: 'http', host: 'localhost', port: 8081 });
 var tableUserAction = client.table('user_action');
@@ -64,22 +65,14 @@ var reader = {
 			if( cells ) {
 				console.info('getRows: %d',cells.length);
 
-				var rowsMap = {};
+				var uacells = [];
 				for(var i=0; i < cells.length; i++) {
-					var cell = cells[i];
-					console.info('column: %s, value: %s',cell.column,cell.$);
-					if( ! (cell.key in rowsMap) ) {
-						rowsMap[key] = { key: cell.key};
-					}
-					var row = rowsMap[cell.key];
-					row[cell.column] = cell.$;
+					var uacell = UserActionCell.create(cells[i]);
+					console.log(uacell);
+					uacells.append(uacell);
 				}
 
-				var rows = []
-				for(var key in rowsMap) {
-					rows.append(rowsMap[key]);
-				}
-				this.callback(err,rows);
+				this.callback(err,uacells);
 			} else if( err ) {
 				console.error(err);
 				console.error(err.stack);
