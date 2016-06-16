@@ -63,13 +63,12 @@ var reader = {
 		ctx.callback = callback;
 		ctx._onCells = function(err,cells) {
 			if( cells ) {
-				console.info('getRows: %d',cells.length);
 				var parser = HTableParser.create();
 				for(var i=0; i < cells.length; i++) {
 					parser.merge(cells[i]);
 				}
 				var rows = parser.getRows();
-				console.log(rows);
+				console.info('getRows: %d',rows.length);
 				this.callback(err,rows);
 			} else if( err ) {
 				console.error(err);
@@ -81,16 +80,18 @@ var reader = {
 			if( err || company == null ) {
 				this.callback('company not found',null);
 			}
-			console.info('company: %s',company);
+			console.info('scan: company=%s uid=%s start=%s',company,this.options.uid,this.options.start);
 
 			var scanOpt = {};
 			scanOpt.maxVersion = 1;
 			scanOpt.startRow = userActionKey(company,this.options.uid,this.options.start,null);
 			if( this.options.end ) {
 				scanOpt.endRow = userActionKey(company,this.options.uid,this.options.end,null);
+			} else {
+				scanOpt.endRow = userActionKey(company,this.options.uid);
 			}
-			console.info('scanOpt:');
-			console.info(scanOpt);
+			console.info('startRow: %s', scanOpt.startRow.toString('hex'));
+			console.info('endRow: %s', scanOpt.endRow.toString('hex'));
 			this.scaner = tableUserAction.scan(scanOpt,this._onCells);
 		}.bind(ctx);
 

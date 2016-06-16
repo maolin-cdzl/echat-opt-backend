@@ -28,7 +28,7 @@ function cellToRow(cell) {
 }
 
 function mergeToRow(row,cell) {
-	if( ! cell.family in row ) {
+	if( ! (cell.family in row) ) {
 		row[cell.family] = {};
 	}
 	row[cell.family][cell.column] = cell.value;
@@ -44,7 +44,7 @@ var HTableParser = {
 			var cell = dataToCell(data);
 			if( cell == null )
 				return;
-			if( ! cell.key in this._rowMap ) {
+			if( ! (cell.key in this._rowMap) ) {
 				this._rowMap[ cell.key ] = cellToRow(cell);
 			} else {
 				mergeToRow( this._rowMap[cell.key],cell );
