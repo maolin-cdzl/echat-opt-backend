@@ -20,6 +20,7 @@ function stringHashCode(str) {
 	var hash = 5381;
 	for(var i=0; i < str.length; i++) {
 		hash = hash * 33 + str[i];
+		hash = hash & 0xFFFFFFFF;
 	}
 	return hash;
 }
@@ -33,8 +34,10 @@ function int64lo(num) {
 }
 
 function userActionKey(company,uid,datetime,ev) {
+	console.log('%s %s %s',company,uid,datetime);
 	var keybuf = new ArrayBuffer(20);
 	var keyview = new DataView(keybuf);
+
 	keyview.setInt32(0,stringHashCode(company));
 	keyview.setInt32(4,stringHashCode(uid));
 	if( datetime ) {
@@ -44,11 +47,24 @@ function userActionKey(company,uid,datetime,ev) {
 		}
 		keyview.setInt32(8,int64hi(ts));
 		keyview.setInt32(12,int64lo(ts));
+	} else {
+		keyview.setInt32(8,0xFFFFFFFF);
+		keyview.setInt32(12,0xFFFFFFFF);
 	}
 	if( ev ) {
 		keyview.setInt32(16,stringHashCode(ev));
+	} else {
+		keyview.setInt32(16,0xFFFFFFFF);
 	}
-	return keybuf;
+	return new Uint8Array(keybuf);
+}
+
+function ua2hex(ua) {
+	var hex ='';
+	for(var i=0; i < ua.length; i++) {
+		hex += ua[i].toString(16) + ' ';
+	}
+	return hex;
 }
 
 var reader = {
@@ -90,8 +106,8 @@ var reader = {
 			} else {
 				scanOpt.endRow = userActionKey(company,this.options.uid);
 			}
-			console.info('startRow: %s', scanOpt.startRow.toString('hex'));
-			console.info('endRow: %s', scanOpt.endRow.toString('hex'));
+			console.info('startRow: %s', ua2hex(scanOpt.startRow));
+			console.info('endRow: %s', ua2hex(scanOpt.endRow));
 			this.scaner = tableUserAction.scan(scanOpt,this._onCells);
 		}.bind(ctx);
 
