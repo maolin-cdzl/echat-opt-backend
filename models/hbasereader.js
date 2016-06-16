@@ -69,7 +69,7 @@ var reader = {
 				for(var i=0; i < cells.length; i++) {
 					var uacell = UserActionTable.createFromCell(cells[i]);
 					console.log(uacell);
-					uacells.append(uacell);
+					uacells.push(uacell);
 				}
 
 				this.callback(err,uacells);
