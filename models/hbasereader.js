@@ -167,6 +167,32 @@ var reader = {
 			callback(null,decoder.getObjs());
 		});
 	},
+	groupEvent: function(options,callback) {
+		if( options.group == null || options.start == null ) {
+			callback('bad options',null);
+			return;
+		}
+		redisReader.readKeyValue('db:group:' + options.group + ':company',function(err,company) {
+			if( err || company == null ) {
+				callback('company not found',null);
+				return;
+			}
+			var startRow = kgGroupEvent.generate(company,options.group,options.start);
+			var endRow = kgGroupEvent.generate(company,options.group,options.end || HKeyGenerator.ValueEnum.MAX);
+			var scanner = hclient.getScanner('group_event',startRow,endRow);
+			var decoder = HRowDecoder.create();
+			scanner.each(function(err,row){
+				if( row ) {
+					decoder.merge(row);
+				} else if( err ) {
+					console.error('scanner error: ',err);
+					callback(err);
+				}
+			},function(){
+				callback(null,decoder.getObjs());
+			});
+		});
+	},
 	serverUserLoad: function(options,callback) {
 		options.table = 'server_user_load';
 		options.entity = options.server;

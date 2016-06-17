@@ -1,11 +1,11 @@
 var restify = require('restify');
 
-var server = restify.createServer({
+var webserver = restify.createServer({
   name: 'echt-backend',
   version: '1.0.0'
 });
 
-server.use(restify.CORS({
+webserver.use(restify.CORS({
 	// Defaults to ['*'].
 	origins: ['*'], 
 	// Defaults to false.
@@ -16,47 +16,68 @@ server.use(restify.CORS({
 
 var user = require('./controllers/user');
 var dev = require('./controllers/dev');
-var pttsvc = require('./controllers/pttsvc');
+var server = require('./controllers/server');
+var company = require('./controllers/company.js');
+var group = require('./controllers/group.js');
 
-server.acceptable.push('text/event-stream');
-server.use(restify.acceptParser(server.acceptable));
-server.use(restify.queryParser());
-server.use(restify.bodyParser());
+webserver.acceptable.push('text/event-stream');
+webserver.use(restify.acceptParser(webserver.acceptable));
+webserver.use(restify.queryParser());
+webserver.use(restify.bodyParser());
 
 
-server.get('/rt/user/count',user.count);
-server.get('/rt/user/:uid/company',user.company);
-server.get('/rt/user/:uid/state',user.state);
-server.get('/rt/user/:uid/server',user.server);
-server.get('/rt/user/:uid/group',user.group);
-server.get('/rt/user/:uid/device',user.device);
-server.get('/rt/user/:uid/lastlogin',user.lastLogin);
-server.get('/rt/user/:uid/lastlogout',user.lastLogout);
+webserver.get('/rt/user/count',user.count);
+webserver.get('/rt/user/:uid/company',user.company);
+webserver.get('/rt/user/:uid/state',user.state);
+webserver.get('/rt/user/:uid/server',user.server);
+webserver.get('/rt/user/:uid/group',user.group);
+webserver.get('/rt/user/:uid/device',user.device);
+webserver.get('/rt/user/:uid/lastlogin',user.lastLogin);
+webserver.get('/rt/user/:uid/lastlogout',user.lastLogout);
 
-server.get('/rt/user/:uid/actions',user.actions);
-server.get('/rt/user/:uid/sessions',user.sessions);
-server.get('/rt/user/:uid/brokens',user.brokens);
+webserver.get('/rt/user/:uid/actions',user.actions);
+webserver.get('/rt/user/:uid/sessions',user.sessions);
+webserver.get('/rt/user/:uid/brokens',user.brokens);
 
-server.get('/rt/dev/info',dev.devSet);
+webserver.get('/rt/dev/info',dev.devSet);
 
-server.get('/rt/server/list',pttsvc.list);
-server.get('/rt/server/:server/usercount',pttsvc.userCount);
-server.get('/rt/server/:server/users',pttsvc.users);
-server.get('/rt/server/:server/userload',pttsvc.userLoad);
-server.get('/rt/server/:server/speakload',pttsvc.speakLoad);
+webserver.get('/rt/server/list',server.list);
+webserver.get('/rt/server/:server/usercount',server.userCount);
+webserver.get('/rt/server/:server/users',server.users);
+webserver.get('/rt/server/:server/userload',server.userLoad);
+webserver.get('/rt/server/:server/speakload',server.speakLoad);
+
+webserver.get('/rt/company/:company/usercount',company.userCount);
+webserver.get('/rt/company/:company/users',company.users);
+webserver.get('/rt/company/:company/groupcount',company.groupCount);
+webserver.get('/rt/company/:company/groups',company.groups);
+webserver.get('/rt/company/:company/tempgroupcount',company.tempgroupCount);
+webserver.get('/rt/company/:company/tempgroups',company.tempgroups);
+webserver.get('/rt/company/:company/userload',company.userLoad);
+webserver.get('/rt/company/:company/speakload',company.speakLoad);
+webserver.get('/rt/company/:company/sessions',company.sessions);
+
+webserver.get('/rt/group/count',group.count);
+webserver.get('/rt/group/list',group.list);
+webserver.get('/rt/group/:group/users',group.users);
+webserver.get('/rt/group/:group/server',group.server);
+webserver.get('/rt/tempgroup/count',group.tg_count);
+webserver.get('/rt/tempgroup/list',group.tg_list);
+webserver.get('/rt/tempgroup/:group/users',group.tg_users);
+webserver.get('/rt/tempgroup/:group/server',group.tg_server);
+
 
 var SSE = require('./controllers/sse');
-var serverSse = SSE.create('pttsvc*','server');
+var serverSse = SSE.create('server*','server');
 
-server.get('/rt/server/pub',serverSse.request);
-server.get('/rt/server/:channel/pub',serverSse.request);
-
+webserver.get('/rt/server/pub',serverSse.request);
+webserver.get('/rt/server/:channel/pub',serverSse.request);
 
 process.on('SIGINT',function(){
     console.info('SIGINT');
 	process.exit(0);
 });
 
-server.listen(8080, function () {
-  console.log('%s listening at %s', server.name, server.url);
+webserver.listen(8080, function () {
+  console.log('%s listening at %s', webserver.name, webserver.url);
 });

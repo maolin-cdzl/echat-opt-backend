@@ -2,7 +2,7 @@ var redis = require('../models/redisreader');
 var hbase = require('../models/hbasereader');
 var JsonResponser = require('./json-responser');
 
-var pttsvcProvider = {
+var serverProvider = {
 	list : function(req,res,next) {
 		var key = 'server-set';
         console.info('get server list: %s', key);
@@ -48,4 +48,4 @@ var pttsvcProvider = {
 	},
 };
 
-module.exports = pttsvcProvider;
+module.exports = serverProvider;
