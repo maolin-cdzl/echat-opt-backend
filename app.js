@@ -25,6 +25,7 @@ server.use(restify.bodyParser());
 
 
 server.get('/rt/user/count',user.count);
+server.get('/rt/user/:uid/company',user.company);
 server.get('/rt/user/:uid/state',user.state);
 server.get('/rt/user/:uid/server',user.server);
 server.get('/rt/user/:uid/group',user.group);
@@ -39,6 +40,8 @@ server.get('/rt/user/:uid/brokens',user.brokens);
 server.get('/rt/dev/info',dev.devSet);
 
 server.get('/rt/server/list',pttsvc.list);
+server.get('/rt/server/usercount',pttsvc.userCount);
+server.get('/rt/server/users',pttsvc.users);
 
 var SSE = require('./controllers/sse');
 var serverSse = SSE.create('pttsvc*','server');

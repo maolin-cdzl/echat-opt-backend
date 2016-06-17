@@ -4,7 +4,7 @@ var JsonResponser = require('./json-responser');
 
 var userProvider = {
 	count: function(req,res,next) {
-		var key = 'user:set';
+		var key = 'online-user';
 		redis.readSetSize(key,JsonResponser.create(req,res,next).integerResponser);
 	},
 	company: function(req,res,next) {
@@ -35,7 +35,7 @@ var userProvider = {
 	},
 	device: function(req,res,next) { 
 		var key = 'user:' + req.params.uid + ':dev-set';
-		redis.readSKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
+		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
 	},
 	actions: function(req,res,next) {
 		var query = require('url').parse(req.url,true).query;
