@@ -42,6 +42,8 @@ server.get('/rt/dev/info',dev.devSet);
 server.get('/rt/server/list',pttsvc.list);
 server.get('/rt/server/:server/usercount',pttsvc.userCount);
 server.get('/rt/server/:server/users',pttsvc.users);
+server.get('/rt/server/:server/userload',pttsvc.userLoad);
+server.get('/rt/server/:server/speakload',pttsvc.speakLoad);
 
 var SSE = require('./controllers/sse');
 var serverSse = SSE.create('pttsvc*','server');
