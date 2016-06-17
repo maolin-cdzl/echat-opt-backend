@@ -77,20 +77,9 @@ var kgTempGroupSpeaking = HKeyGenerator.create([
 		HKeyGenerator.FieldEnum.STRING_HASH,						// uid
 		HKeyGenerator.FieldEnum.STRING_HASH						// gid
 ]);
-var kgServerUserLoad = HKeyGenerator.create([
-		HKeyGenerator.FieldEnum.STRING_HASH,						// server
-		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// ts
-]);
-var kgServerSpeakLoad = HKeyGenerator.create([
-		HKeyGenerator.FieldEnum.STRING_HASH,						// server
-		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// ts
-]);
-var kgCompanyUserLoad = HKeyGenerator.create([
-		HKeyGenerator.FieldEnum.STRING_HASH,						// company
-		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// ts
-]);
-var kgCompanySpeakLoad = HKeyGenerator.create([
-		HKeyGenerator.FieldEnum.STRING_HASH,						// company
+
+var kgLoadReport = HKeyGenerator.create([
+		HKeyGenerator.FieldEnum.STRING_HASH,						// server or company
 		HKeyGenerator.FieldEnum.DATETIME_TIMESTAMP,				// ts
 ]);
 
@@ -176,7 +165,49 @@ var reader = {
 		},function(){
 			callback(null,decoder.getObjs());
 		});
-	}
+	},
+	serverUserLoad: function(options,callback) {
+		options.table = 'server_user_load';
+		options.entity = options.server;
+		loadReport(options,callback);
+	},
+	serverSpeakLoad: function(options,callback) {
+		options.table = 'server_speak_load';
+		options.entity = options.server;
+		loadReport(options,callback);
+	},
+	companyUserLoad: function(options,callback) {
+		options.table = 'company_user_load';
+		options.entity = options.company;
+		loadReport(options,callback);
+	},
+	companySpeakLoad: function(options,callback) {
+		options.table = 'company_speak_load';
+		options.entity = options.company;
+		loadReport(options,callback);
+	},
+
+	
+	loadReport: function(options,callback) {
+		if( options.entity == null || options.table == null || options.start == null ) {
+			callback('bad options',null);
+			return;
+		}
+		var startRow = kgLoadReport.generate(options.entity,options.start);
+		var endRow = kgLoadReport.generate(options.entity,options.end || HKeyGenerator.ValueEnum.MAX);
+		var scanner = hclient.getScanner(options.table,startRow,endRow);
+		var decoder = HRowDecoder.create();
+		scanner.each(function(err,row){
+			if( row ) {
+				decoder.merge(row);
+			} else if( err ) {
+				console.error('scanner error: ',err);
+				callback(err);
+			}
+		},function(){
+			callback(null,decoder.getObjs());
+		});
+	},
 }
 
 module.exports = reader;

@@ -46,7 +46,7 @@ var JsonResponser = {
 					values.forEach(function(v,i) {
 						set.push(v);
 					});
-					res.json(JSON.stringify(set));
+					res.json(set);
 				}
 			} else {
 				res.status(500);
