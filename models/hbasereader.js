@@ -1,5 +1,6 @@
-var hbase = require('hbase-rpc-client')
-var redisReader = require('./redisreader')
+var dateformat = require('dateformat');
+var hbase = require('hbase-rpc-client');
+var redisReader = require('./redisreader');
 var HRowDecoder = require('./hbaseutil').HRowDecoder;
 var HKeyGenerator = require('./hbaseutil').HKeyGenerator;
 
@@ -201,9 +202,9 @@ var reader = {
 			keyname: 'time',
 			keytrans: function(keybuf) {
 				var hi = keybuf.readUInt32BE(4);
-				var low = keybuf.readUint32BE(8);
+				var low = keybuf.readUInt32BE(8);
 				var ts = hi * 0x100000000 + low;
-				return new Date(ts).toLocaleFormat('%Y-%m-%d %H:%M:%S');
+				return dateformat(new Date(ts),"yyyy-mm-dd HH:MM:ss");
 			},
 			'l:report' : function(val) {
 				return JSON.parse(val.toString());
