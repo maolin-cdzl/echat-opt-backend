@@ -53,12 +53,23 @@ var userProvider = {
 		console.info('actions: uid=%d start=%s',opt.uid,opt.start)
 		hbase.userAction(opt,JsonResponser.create(req,res,next).arrayResponser);
 	},
+	sessions: function(req,res,next) { 
+		var query = require('url').parse(req.url,true).query;
+		if( ! query.start ) {
+			console.info('required start');
+			res.status(400);
+			res.end();
+			return;
+		}
+		var opt = { uid: req.params.uid, start: query.start };
+		if( query.end ) {
+			opt.end = query.end;
+		}
+		console.info('sessions: uid=%d start=%s',opt.uid,opt.start);
+		hbase.userSessionByUid(opt,JsonResponser.create(req,res,next).arrayResponser);
+	},
 	brokens: function(req,res,next) { 
 		var key = 'user:' + req.params.uid + ':brokens';
-		redis.readList(key,JsonResponser.create(req,res,next).arrayResponser);
-	},
-	sessions: function(req,res,next) { 
-		var key = 'user:' + req.params.uid + ':sessions';
 		redis.readList(key,JsonResponser.create(req,res,next).arrayResponser);
 	},
 };

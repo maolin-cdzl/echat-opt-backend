@@ -95,40 +95,22 @@ var kgCompanySpeakLoad = HKeyGenerator.create([
 ]);
 
 
-function onCells(err,cells) {
-	if( cells ) {
-		var decoder = HRowDecoder.create();
-		for(var i=0; i < cells.length; i++) {
-			decoder.merge(cells[i]);
-		}
-		var rows = decoder.getRows();
-		console.info('getRows: %d',rows.length);
-		this.callback(err,rows);
-	} else if( err ) {
-		console.error(err);
-		console.error(err.stack);
-		this.callback(err);
-	}
-}
-
 var reader = {
 	userAction: function(options,callback) {
 		if( options.uid == null || options.start == null || callback == null ) {
 			callback('bad options',null);
 			return;
 		}
-
-		var ctx = {}
-		ctx.options = options;
-		ctx.callback = callback;
-		ctx._scan = function(err,company) {
+		
+		redisReader.readKeyValue('db:user:' + options.uid + ':company',function(err,company) {
 			if( err || company == null ) {
-				this.callback('company not found',null);
+				callback('company not found',null);
+				return;
 			}
-			console.info('scan: company=%s uid=%s start=%s',company,this.options.uid,this.options.start);
+			console.info('scan: company=%s uid=%s start=%s',company,options.uid,options.start);
 
-			var startRow = kgUserAction.generate(company,this.options.uid,this.options.start);
-			var endRow = kgUserAction.generate(company,this.options.uid,this.options.end | HKeyGenerator.ValueEnum.MAX);
+			var startRow = kgUserAction.generate(company,options.uid,options.start);
+			var endRow = kgUserAction.generate(company,options.uid,options.end || HKeyGenerator.ValueEnum.MAX);
 			var decoder = HRowDecoder.create();
 			var scanner = hclient.getScanner('user_action',startRow,endRow);
 			scanner.each(function(err,row){
@@ -139,13 +121,62 @@ var reader = {
 					callback(err);
 				}
 			},function(){
-				callback(null,decoder.getRows());
+				callback(null,decoder.getObjs());
 			});
 
-		}.bind(ctx);
+		});
 
-		redisReader.readKeyValue('db:user:' + options.uid + ':company',ctx._scan);
 	},
+	userSessionByUid: function(options,callback) {
+		if( options.uid == null || options.start == null ) {
+			callback('bad options',null);
+			return;
+		}
+		redisReader.readKeyValue('db:user:' + options.uid + ':company',function(err,company) {
+			if( err || company == null ) {
+				callback('company not found',null);
+				return;
+			}
+			options.company = company;
+			userSessionByCompany(options,callback);
+		});
+	},
+	userSessionByCompany: function(options,callback) {
+		if( options.company == null || options.start == null ) {
+			callback('bad options',null);
+			return;
+		}
+		var startRow = kgUserSession.generate(options.company,options.start);
+		var endRow = kgUserSession.generate(options.company,options.end || HKeyGenerator.ValueEnum.MAX);
+		var scanner = hclient.getScanner('user_session',startRow,endRow);
+		if( options.uid ) {
+			var fl = new hbase.FilterList();
+			fl.addFilter({ singleColumnValueFilter: {
+				columnFamily: "l",
+				columnQualifier: "uid",
+				compareOp: "EQUAL",
+				comparator: {
+					stringComparattor: {
+						str: options.uid
+					}
+				},
+				filterIfMissing: true,
+				latestVersionOnly: true
+			}});
+			scanner.setFilter(fl);
+		}
+		var decoder = HRowDecoder.create();
+		scanner.each(function(err,row){
+			if( row ) {
+				decoder.merge(row);
+			} else if( err ) {
+				console.error('scanner error: ',err);
+				callback(err);
+			}
+		},function(){
+			callback(null,decoder.getObjs());
+		});
+	}
 }
 
 module.exports = reader;

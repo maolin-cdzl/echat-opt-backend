@@ -1,25 +1,26 @@
 
-function rawrowToRow(rawrow) {
-	var row = { key: rawrow.row.toString('hex') };
-	var rowcols = {};
-	for(var col in rawrow.cols) {
-		var cell = rawrow.cols[col];
-		rowcols[ col ] = cell.value.toString();
-	}
-	row.cols = rowcols;
-	return row;
-}
-
 var rowDecoder = {
-	create: function() {
+	create: function(options) {
 		var decoder = {};
-		var _rows = [];
+		var _objs = [];
+		if( options == undefined ) {
+			options = {};
+		}
 
-		decoder.merge = function(rawrow) {
-			_rows.push( rawrowToRow(rawrow) );
+		decoder.merge = function(row) {
+			var obj = { };
+			if( options.include_key ) {
+				obj.key = row.row.toString('hex');
+			}
+			
+			for(var col in row.cols) {
+				var cell = row.cols[col];
+				obj[ col ] = cell.value.toString();
+			}
+			_objs.push( obj );
 		};
-		decoder.getRows = function() {
-			return _rows;
+		decoder.getObjs = function() {
+			return _objs;
 		};
 		return decoder;
 	}
