@@ -169,22 +169,22 @@ var reader = {
 	serverUserLoad: function(options,callback) {
 		options.table = 'server_user_load';
 		options.entity = options.server;
-		loadReport(options,callback);
+		reader.loadReport(options,callback);
 	},
 	serverSpeakLoad: function(options,callback) {
 		options.table = 'server_speak_load';
 		options.entity = options.server;
-		loadReport(options,callback);
+		reader.loadReport(options,callback);
 	},
 	companyUserLoad: function(options,callback) {
 		options.table = 'company_user_load';
 		options.entity = options.company;
-		loadReport(options,callback);
+		reader.loadReport(options,callback);
 	},
 	companySpeakLoad: function(options,callback) {
 		options.table = 'company_speak_load';
 		options.entity = options.company;
-		loadReport(options,callback);
+		reader.loadReport(options,callback);
 	},
 
 	
@@ -196,7 +196,19 @@ var reader = {
 		var startRow = kgLoadReport.generate(options.entity,options.start);
 		var endRow = kgLoadReport.generate(options.entity,options.end || HKeyGenerator.ValueEnum.MAX);
 		var scanner = hclient.getScanner(options.table,startRow,endRow);
-		var decoder = HRowDecoder.create();
+		var decoder = HRowDecoder.create({
+			include_key: true,
+			keyname: 'time',
+			keytrans: function(keybuf) {
+				var hi = keybuf.readUInt32BE(4);
+				var low = keybuf.readUint32BE(8);
+				var ts = hi * 0x100000000 + low;
+				return new Date(ts).toLocaleFormat('%Y-%m-%d %H:%M:%S');
+			},
+			'l:report' : function(val) {
+				return JSON.parse(val.toString());
+			}
+		});
 		scanner.each(function(err,row){
 			if( row ) {
 				decoder.merge(row);

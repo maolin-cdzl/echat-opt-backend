@@ -1,3 +1,10 @@
+function defaultKeyTrans(keybuf) {
+	return keybuf.toString('hex');
+}
+
+function defaultValueTrans(val) {
+	return val.toString();
+}
 
 var rowDecoder = {
 	create: function(options) {
@@ -8,17 +15,28 @@ var rowDecoder = {
 		}
 
 		decoder.merge = function(row) {
+			_objs.push( decoder.trans(row) );
+		};
+
+		decoder.trans = function(row) {
 			var obj = { };
 			if( options.include_key ) {
-				obj.key = row.row.toString('hex');
+				var keyname = options.keyname || 'key';
+				var keytrans = options.keytrans || defaultKeyTrans;
+				obj[keyname] = keytrans(row.row);
 			}
 			
 			for(var col in row.cols) {
 				var cell = row.cols[col];
-				obj[ col ] = cell.value.toString();
+				if( options[col] ) {
+					obj[ col ] = options[col](cell.value);
+				} else {
+					obj[ col ] = cell.value.toString();
+				}
 			}
-			_objs.push( obj );
+			return obj;
 		};
+
 		decoder.getObjs = function() {
 			return _objs;
 		};
