@@ -3,6 +3,22 @@ var hbase = require('../models/hbasereader');
 var JsonResponser = require('./json-responser');
 
 var companyProvider = {
+	agent: function(req,res,next) {
+		var key = 'db:company:' + req.params.company + ':agent';
+		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
+	},
+	subs: function(req,res,next) {
+		var key = 'db:company:' + req.params.company + ':subs';
+		redis.readSet(key,JsonResponser.create(req,res,next).arrayResponser);
+	},
+	count: function(req,res,next) {
+		var key = 'db:company';
+		redis.readSetSize(key,JsonResponser.create(req,res,next).integerResponser);
+	},
+	list: function(req,res,next) {
+		var key = 'db:company';
+		redis.readSet(key,JsonResponser.create(req,res,next).arrayResponser);
+	},
 	userCount: function(req,res,next) {
 		var key = 'company:' + req.params.company + ':user';
 		redis.readSetSize(key,JsonResponser.create(req,res,next).integerResponser);

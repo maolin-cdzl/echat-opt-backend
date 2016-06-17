@@ -19,6 +19,7 @@ var dev = require('./controllers/dev');
 var server = require('./controllers/server');
 var company = require('./controllers/company.js');
 var group = require('./controllers/group.js');
+var agent = require('./controllers/agent.js');
 
 webserver.acceptable.push('text/event-stream');
 webserver.use(restify.acceptParser(webserver.acceptable));
@@ -47,6 +48,15 @@ webserver.get('/rt/server/:server/users',server.users);
 webserver.get('/rt/server/:server/userload',server.userLoad);
 webserver.get('/rt/server/:server/speakload',server.speakLoad);
 
+webserver.get('/rt/agent/count',agent.count);
+webserver.get('/rt/agent/list',agent.list);
+webserver.get('/rt/agent/:agent/company',agent.company);
+webserver.get('/rt/agent/:agent/subs',agent.subs);
+
+webserver.get('/rt/company/count',company.count);
+webserver.get('/rt/company/list',company.list);
+webserver.get('/rt/company/:company/agent',company.agent);
+webserver.get('/rt/company/:company/subs',company.subs);
 webserver.get('/rt/company/:company/usercount',company.userCount);
 webserver.get('/rt/company/:company/users',company.users);
 webserver.get('/rt/company/:company/groupcount',company.groupCount);
