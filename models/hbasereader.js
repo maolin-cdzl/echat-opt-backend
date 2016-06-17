@@ -138,7 +138,7 @@ var reader = {
 				return;
 			}
 			options.company = company;
-			userSessionByCompany(options,callback);
+			reader.userSessionByCompany(options,callback);
 		});
 	},
 	userSessionByCompany: function(options,callback) {

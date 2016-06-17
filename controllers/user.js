@@ -4,7 +4,7 @@ var JsonResponser = require('./json-responser');
 
 var userProvider = {
 	count: function(req,res,next) {
-		var key = 'user:set';
+		var key = 'online-user';
 		redis.readSetSize(key,JsonResponser.create(req,res,next).integerResponser);
 	},
 	company: function(req,res,next) {
