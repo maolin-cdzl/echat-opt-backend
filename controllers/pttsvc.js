@@ -11,7 +11,7 @@ var pttsvcProvider = {
 		var key = 'server:' + req.params.server + ':user';
 		readis.readSetSize(key,JsonResponser.create(req,res,next).integerResponser);
 	},
-	users: function(req,res.next) {
+	users: function(req,res,next) {
 		var key = 'server:' + req.params.server + ':user';
 		readis.readSet(key,JsonResponser.create(req,res,next).arrayResponser);
 	}
