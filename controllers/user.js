@@ -9,7 +9,7 @@ var userProvider = {
 	},
 	info: function(req,res,next) {
 		var key = 'db:user:' + req.params.uid + ':info';
-		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
+		redis.readKeyValue(key,JsonResponser.create(req,res,next).jsonStringResponser);
 	},
 	company: function(req,res,next) {
 		var key = 'db:user:' + req.params.uid + ':company';
@@ -31,11 +31,11 @@ var userProvider = {
 	},
 	lastLogin: function(req,res,next) { 
 		var key = 'user:' + req.params.uid + ':last-login';
-		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
+		redis.readKeyValue(key,JsonResponser.create(req,res,next).jsonStringResponser);
 	},
 	lastLogout: function(req,res,next) { 
 		var key = 'user:' + req.params.uid + ':last-logout';
-		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
+		redis.readKeyValue(key,JsonResponser.create(req,res,next).jsonStringResponser);
 	},
 	device: function(req,res,next) { 
 		var key = 'user:' + req.params.uid + ':dev-set';

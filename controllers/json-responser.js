@@ -35,6 +35,21 @@ var JsonResponser = {
 			}
 			next();
 		};
+		responser.jsonStringResponser = function(err,value) {
+			if( !err ) {
+				if( !value ) {
+					res.status(404);
+					res.end();
+				} else {
+					var obj = JSON.parse(value);
+					res.json(obj);
+				}
+			} else {
+				res.status(500);
+				res.end(err.message);
+			}
+			next();
+		};
 
 		responser.arrayResponser = function(err,values) {
 			if( !err ) {
