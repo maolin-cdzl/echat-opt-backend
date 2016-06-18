@@ -7,6 +7,10 @@ var userProvider = {
 		var key = 'online-user';
 		redis.readSetSize(key,JsonResponser.create(req,res,next).integerResponser);
 	},
+	info: function(req,res,next) {
+		var key = 'db:user:' + req.params.uid + ':info';
+		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
+	},
 	company: function(req,res,next) {
 		var key = 'db:user:' + req.params.uid + ':company';
         console.info('get company: %s', key);

@@ -28,6 +28,7 @@ webserver.use(restify.bodyParser());
 
 
 webserver.get('/rt/user/count',user.count);
+webserver.get('/rt/user/:uid/info',user.info);
 webserver.get('/rt/user/:uid/company',user.company);
 webserver.get('/rt/user/:uid/state',user.state);
 webserver.get('/rt/user/:uid/server',user.server);
