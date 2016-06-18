@@ -78,7 +78,7 @@ webserver.get('/rt/tempgroup/:group/server',group.tg_server);
 
 
 var SSE = require('./controllers/sse');
-var serverSse = SSE.create('server*','server');
+var serverSse = SSE.create('appload-*','serverload');
 
 webserver.get('/rt/server/pub',serverSse.request);
 webserver.get('/rt/server/:channel/pub',serverSse.request);
