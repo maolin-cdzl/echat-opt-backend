@@ -46,6 +46,8 @@ webserver.get('/rt/dev/info',dev.devSet);
 webserver.get('/rt/server/list',server.list);
 webserver.get('/rt/server/:server/usercount',server.userCount);
 webserver.get('/rt/server/:server/users',server.users);
+webserver.get('/rt/server/:server/groupcount',server.groupcount);
+webserver.get('/rt/server/:server/groups',server.groups);
 webserver.get('/rt/server/:server/userload',server.userLoad);
 webserver.get('/rt/server/:server/speakload',server.speakLoad);
 

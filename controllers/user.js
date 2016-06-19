@@ -13,12 +13,10 @@ var userProvider = {
 	},
 	company: function(req,res,next) {
 		var key = 'db:user:' + req.params.uid + ':company';
-        console.info('get company: %s', key);
 		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
 	},
 	state : function(req,res,next) {
 		var key = 'user:' + req.params.uid + ':state';
-        console.info('get state : %s', key);
 		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
 	},
 	server: function(req,res,next) { 
@@ -45,7 +43,6 @@ var userProvider = {
 		var query = require('url').parse(req.url,true).query;
 
 		if( ! query.start ) {
-			console.info('required start');
 			res.status(400);
 			res.end();
 			return;
@@ -54,13 +51,11 @@ var userProvider = {
 		if( query.end ) {
 			opt.end = query.end;
 		}
-		console.info('actions: uid=%d start=%s',opt.uid,opt.start)
 		hbase.userAction(opt,JsonResponser.create(req,res,next).arrayResponser);
 	},
 	sessions: function(req,res,next) { 
 		var query = require('url').parse(req.url,true).query;
 		if( ! query.start ) {
-			console.info('required start');
 			res.status(400);
 			res.end();
 			return;
@@ -69,7 +64,6 @@ var userProvider = {
 		if( query.end ) {
 			opt.end = query.end;
 		}
-		console.info('sessions: uid=%d start=%s',opt.uid,opt.start);
 		hbase.userSessionByUid(opt,JsonResponser.create(req,res,next).arrayResponser);
 	},
 	brokens: function(req,res,next) { 

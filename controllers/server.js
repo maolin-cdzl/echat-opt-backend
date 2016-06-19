@@ -16,6 +16,14 @@ var serverProvider = {
 		var key = 'server:' + req.params.server + ':user';
 		redis.readSet(key,JsonResponser.create(req,res,next).arrayResponser);
 	},
+	groupcount: function(req,res,next) {
+		var key = 'server:' + req.params.server + ':group';
+		redis.readSetSize(key,JsonResponser.create(req,res,next).integerResponser);
+	},
+	groups: function(req,res,next) {
+		var key = 'server:' + req.params.server + ':group';
+		redis.readSet(key,JsonResponser.create(req,res,next).arrayResponser);
+	},
 	userLoad: function(req,res,next) {
 		var query = require('url').parse(req.url,true).query;
 
