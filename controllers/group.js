@@ -31,7 +31,7 @@ var groupProvider = {
 	},
 	server: function(req,res,next) {
 		var key = 'group:' + req.params.group + ':server';
-		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
+		redis.readSet(key,JsonResponser.create(req,res,next).arrayResponser);
 	},
 	tg_server: function(req,res,next) {
 		var key = 'tgroup:' + req.params.group + ':server';
