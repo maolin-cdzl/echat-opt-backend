@@ -38,7 +38,7 @@ var userProvider = {
 		redis.readKeyValue(key,JsonResponser.create(req,res,next).jsonStringResponser);
 	},
 	device: function(req,res,next) { 
-		var key = 'user:' + req.params.uid + ':dev-set';
+		var key = 'user:' + req.params.uid + ':dev';
 		redis.readKeyValue(key,JsonResponser.create(req,res,next).stringResponser);
 	},
 	actions: function(req,res,next) {

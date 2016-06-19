@@ -159,7 +159,6 @@ var reader = {
 		var decoder = HRowDecoder.create();
 		scanner.each(function(err,row){
 			if( row ) {
-				console.log('get row');
 				decoder.merge(row);
 			} else if( err ) {
 				console.error('scanner error: ',err);
