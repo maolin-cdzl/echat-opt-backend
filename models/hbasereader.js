@@ -127,6 +127,7 @@ var reader = {
 				callback(new Error('company not found'),null);
 				return;
 			}
+			console.log('found company: %s',company);
 			options.company = company;
 			reader.userSessionByCompany(options,callback);
 		});
@@ -158,6 +159,7 @@ var reader = {
 		var decoder = HRowDecoder.create();
 		scanner.each(function(err,row){
 			if( row ) {
+				console.log('get row');
 				decoder.merge(row);
 			} else if( err ) {
 				console.error('scanner error: ',err);
