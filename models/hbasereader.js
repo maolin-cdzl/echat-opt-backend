@@ -88,13 +88,13 @@ var kgLoadReport = HKeyGenerator.create([
 var reader = {
 	userAction: function(options,callback) {
 		if( options.uid == null || options.start == null || callback == null ) {
-			callback('bad options',null);
+			callback(new Error('bad options'),null);
 			return;
 		}
 		
 		redisReader.readKeyValue('db:user:' + options.uid + ':company',function(err,company) {
 			if( err || company == null ) {
-				callback('company not found',null);
+				callback(new Error('company not found'),null);
 				return;
 			}
 			console.info('scan: company=%s uid=%s start=%s',company,options.uid,options.start);
@@ -119,12 +119,12 @@ var reader = {
 	},
 	userSessionByUid: function(options,callback) {
 		if( options.uid == null || options.start == null ) {
-			callback('bad options',null);
+			callback(new Error('bad options'),null);
 			return;
 		}
 		redisReader.readKeyValue('db:user:' + options.uid + ':company',function(err,company) {
 			if( err || company == null ) {
-				callback('company not found',null);
+				callback(new Error('company not found'),null);
 				return;
 			}
 			options.company = company;
@@ -133,7 +133,7 @@ var reader = {
 	},
 	userSessionByCompany: function(options,callback) {
 		if( options.company == null || options.start == null ) {
-			callback('bad options',null);
+			callback(new Error('bad options'),null);
 			return;
 		}
 		var startRow = kgUserSession.generate(options.company,options.start);
@@ -146,7 +146,7 @@ var reader = {
 				columnQualifier: "uid",
 				compareOp: "EQUAL",
 				comparator: {
-					substringComparattor: {
+					substringComparator: {
 						substr: options.uid
 					}
 				},
@@ -169,12 +169,12 @@ var reader = {
 	},
 	groupEvent: function(options,callback) {
 		if( options.group == null || options.start == null ) {
-			callback('bad options',null);
+			callback(new Error('bad options'),null);
 			return;
 		}
 		redisReader.readKeyValue('db:group:' + options.group + ':company',function(err,company) {
 			if( err || company == null ) {
-				callback('company not found',null);
+				callback(new Error('company not found'),null);
 				return;
 			}
 			var startRow = kgGroupEvent.generate(company,options.group,options.start);
@@ -217,7 +217,7 @@ var reader = {
 	
 	loadReport: function(options,callback) {
 		if( options.entity == null || options.table == null || options.start == null ) {
-			callback('bad options',null);
+			callback(new Error('bad options'),null);
 			return;
 		}
 		var startRow = kgLoadReport.generate(options.entity,options.start);
