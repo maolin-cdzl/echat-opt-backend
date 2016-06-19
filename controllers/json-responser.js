@@ -15,6 +15,7 @@ var JsonResponser = {
 					res.json(JSON.stringify(value));
 				}
 			} else {
+				console.error(err);
 				res.status(500);
 				res.end(err.message);
 			}
@@ -30,6 +31,7 @@ var JsonResponser = {
 					res.json(value);
 				}
 			} else {
+				console.error(err);
 				res.status(500);
 				res.end(err.message);
 			}
@@ -45,6 +47,7 @@ var JsonResponser = {
 					res.json(obj);
 				}
 			} else {
+				console.error(err);
 				res.status(500);
 				res.end(err.message);
 			}
@@ -64,6 +67,7 @@ var JsonResponser = {
 					res.json(set);
 				}
 			} else {
+				console.error(err);
 				res.status(500);
 				res.end(err.message);
 			}
