@@ -146,8 +146,8 @@ var reader = {
 				columnQualifier: "uid",
 				compareOp: "EQUAL",
 				comparator: {
-					stringComparattor: {
-						str: options.uid
+					substringComparattor: {
+						substr: options.uid
 					}
 				},
 				filterIfMissing: true,

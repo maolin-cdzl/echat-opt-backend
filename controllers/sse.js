@@ -21,8 +21,6 @@ function requestProc(req,res,next) {
 }
 
 function onMessage(pattern,channel,message) {
-	console.info('PMESSAGE %s %s %s',pattern,channel,message);
-
 	var lines = message.split('\n');
 	if( lines.length == 0 ) {
 		return;
