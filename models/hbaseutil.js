@@ -78,8 +78,8 @@ function datetimeToBuffer(datetime) {
 	var ts = Date.parse(datetime);
 
 	var buf = new Buffer(8);
-	buf.writeUInt32BE(int64hi(ts),0);
-	buf.writeUInt32BE(int64lo(ts),4);
+	buf.writeInt32BE(int64hi(ts),0);
+	buf.writeInt32BE(int64lo(ts),4);
 	return buf;
 }
 
